@@ -1,21 +1,21 @@
-import opencv
+import cv2
 import numpy as np
 #import pandas as pd
 from matplotlib import pyplot as plt
 
 def o3_Shape_factor_extraction(title, newPicPath):
 ## 이미지 불러들이기 ##
-    img_final = opencv.imread(title)
-    img_final_G = opencv.cvtColor(img_final, opencv.COLOR_BGR2GRAY)
-    ret, img_binary = opencv.threshold(img_final_G, 127, 255, 0)
-#opencv.namedWindow('img_final_G', opencv.WINDOW_NORMAL)
-#opencv.imshow('img_final_G', img_binary)
-#opencv.waitKey(0)
+    img_final = cv2.imread(title)
+    img_final_G = cv2.cvtColor(img_final, cv2.COLOR_BGR2GRAY)
+    ret, img_binary = cv2.threshold(img_final_G, 127, 255, 0)
+#cv2.namedWindow('img_final_G', cv2.WINDOW_NORMAL)
+#cv2.imshow('img_final_G', img_binary)
+#cv2.waitKey(0)
 
 
 ## 윤곽선 추출 ##
-    contours, hierarchy = opencv.findContours(img_binary, opencv.RETR_EXTERNAL, opencv.CHAIN_APPROX_NONE) # 윤곽선 추출
-    nlabels, labels, stats, centroids = opencv.connectedComponentsWithStats(img_binary) # 레이블링 추출
+    contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # 윤곽선 추출
+    nlabels, labels, stats, centroids = cv2.connectedComponentsWithStats(img_binary) # 레이블링 추출
 
     pxsize = 0.02 #1픽셀당 0.02 mm
     i = 0
@@ -28,18 +28,18 @@ def o3_Shape_factor_extraction(title, newPicPath):
 
 
     for cnt in range(len(contours)):
-        rect = opencv.minAreaRect(contours[cnt])
+        rect = cv2.minAreaRect(contours[cnt])
         (x, y), (width, height), angle = rect
         min_size = 6
         if width < min_size and height < min_size: # 장단축 4mm이상 0.01mm이하 데이터 에러처리
             continue
         
         i = i+1 #추출개수
-        opencv.drawContours(img_final, [contours[cnt]], -1, (255,0,0), 1)
-        opencv.putText(img_final, str(i), (int(x), int(y)), 6, 3.0, (255, 0, 0),3)
-        area = opencv.contourArea(contours[cnt])*pxsize*pxsize   # 면적
+        cv2.drawContours(img_final, [contours[cnt]], -1, (255,0,0), 1)
+        cv2.putText(img_final, str(i), (int(x), int(y)), 6, 3.0, (255, 0, 0),3)
+        area = cv2.contourArea(contours[cnt])*pxsize*pxsize   # 면적
         equi_diameter = np.sqrt(4*area/np.pi)  # 공칭직경
-        perimeter = opencv.arcLength(contours[cnt],True)*pxsize   # 둘레길이
+        perimeter = cv2.arcLength(contours[cnt],True)*pxsize   # 둘레길이
         longest = max(width, height)*pxsize
         shortest = min(width, height)*pxsize
         aspect_ratio = min(width, height) / max(width, height) # 종횡비       
@@ -57,7 +57,7 @@ def o3_Shape_factor_extraction(title, newPicPath):
 # 윤곽선 및 라벨링 결과
 #plt.imshow(img_final), plt.title('Contour & Labeling')
 #plt.show()
-#opencv.waitKey(0)
+#cv2.waitKey(0)
 
 # Shape parameter histogram 
 #bins_num = 10 
@@ -89,8 +89,8 @@ def o3_Shape_factor_extraction(title, newPicPath):
     ax[1, 2].hist(Ar_list, color='b', edgecolor='black')
 
 #plt.show()
-#opencv.waitKey(0)
-#opencv.destroyAllWindows()
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 ## 결과 저장 ##
     dstName = newPicPath
